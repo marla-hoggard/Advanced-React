@@ -63,28 +63,11 @@ class CreateItem extends Component {
     }
   };
 
-  update = (cache, payload) => {
-
-    // 1. Read the cache for the items we want
-    const data = cache.readQuery({ query: ALL_ITEMS_QUERY });
-
-    // 2. Add the new item
-    data.items.push({
-      id: payload.data.createItem.id,
-      __typename: "Item",
-      ...this.state,
-    });
-
-    // 3. Put the items back
-    cache.writeQuery({ query: ALL_ITEMS_QUERY, data });
-  }
-
   render() {
     return (
       <Mutation 
         mutation={CREATE_ITEM_MUTATION}
         variables={this.state}
-        update={this.update}
       >
         {(createItem, {loading, error}) => (
           <Form onSubmit={async e => {
