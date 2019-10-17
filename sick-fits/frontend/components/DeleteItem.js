@@ -3,6 +3,7 @@ import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 
 import { ALL_ITEMS_QUERY } from './Items';
+import { PAGINATION_QUERY } from './Pagination';
 
 const DELETE_ITEM_MUTATION = gql`
   mutation DELETE_ITEM_MUTATION($id: ID!) {
@@ -20,12 +21,15 @@ class DeleteItem extends Component {
 
     // 1. Read the cache for the items we want
     const data = cache.readQuery({ query: ALL_ITEMS_QUERY });
+    const pagination = cache.readQuery({ query: PAGINATION_QUERY })
 
     // 2. Filter the deleted item out of the page
     data.items = data.items.filter(item => item.id !== payload.data.deleteItem.id);
+    pagination.itemsConnection.aggregate.count--;
 
     // 3. Put the items back
     cache.writeQuery({ query: ALL_ITEMS_QUERY, data });
+    cache.writeQuery({ query: PAGINATION_QUERY, data: pagination });
   }
 
   render() {
