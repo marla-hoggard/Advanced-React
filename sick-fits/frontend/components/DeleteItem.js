@@ -21,13 +21,13 @@ class DeleteItem extends Component {
 
     // 1. Read the cache for the items we want
     const data = cache.readQuery({ query: ALL_ITEMS_QUERY });
-    const pagination = cache.readQuery({ query: PAGINATION_QUERY })
+    const pagination = cache.readQuery({ query: PAGINATION_QUERY });
 
-    // 2. Filter the deleted item out of the page
+    // 2. Update the data (remove the item, update the count)
     data.items = data.items.filter(item => item.id !== payload.data.deleteItem.id);
     pagination.itemsConnection.aggregate.count--;
 
-    // 3. Put the items back
+    // 3. Write the updates to the cache
     cache.writeQuery({ query: ALL_ITEMS_QUERY, data });
     cache.writeQuery({ query: PAGINATION_QUERY, data: pagination });
   }

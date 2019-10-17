@@ -5,6 +5,7 @@ import Router from 'next/router';
 
 import Error from './ErrorMessage';
 import { ALL_ITEMS_QUERY } from './Items';
+import { PAGINATION_QUERY } from './Pagination';
 import Form from './styles/Form';
 
 const CREATE_ITEM_MUTATION = gql`
@@ -63,11 +64,31 @@ class CreateItem extends Component {
     }
   };
 
+  update = (cache, payload) => {
+    // 1. Read the cache for the items we want
+    const data = cache.readQuery({ query: ALL_ITEMS_QUERY });
+    const pagination = cache.readQuery({ query: PAGINATION_QUERY });
+
+    // 2. Update the data (add new item, update count)
+    const newItem = {
+      id: payload.data.createItem.id,
+      __typename: "Item",
+      ...this.state,
+    }
+    data.items = [newItem, ...data.items];
+    pagination.itemsConnection.aggregate.count++;
+
+    // 3. Write our changes to the cache
+    cache.writeQuery({ query: ALL_ITEMS_QUERY, data });
+    cache.writeQuery({ query: PAGINATION_QUERY, data: pagination });
+  }
+
   render() {
     return (
       <Mutation 
         mutation={CREATE_ITEM_MUTATION}
         variables={this.state}
+        update={this.update}
       >
         {(createItem, {loading, error}) => (
           <Form onSubmit={async e => {
