@@ -1,9 +1,5 @@
 # import * from './generated/prisma.graphql'
 
-type SuccessMessage {
-  message: String
-}
-
 type Query {
   items(where: ItemWhereInput, orderBy: ItemOrderByInput, skip: Int, first: Int): [Item]!
   item(where: ItemWhereUniqueInput!): Item
@@ -43,4 +39,24 @@ type Mutation {
   ): User!
 
   signout: SuccessMessage
+
+  requestReset(email: String!): SuccessMessage
+
+  resetPassword(
+    resetToken: String!
+    newPassword: String!
+    confirmPassword: String!
+  ): User!
+}
+
+type SuccessMessage {
+  message: String
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  password: String!
+  permissions: [Permission!]!
 }
