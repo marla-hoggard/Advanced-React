@@ -123,11 +123,8 @@ const Mutations = {
       data: { resetToken, resetTokenExpiry },
     });
 
-    console.log(res);
-
     // 3. Email them that reset token
-
-    return { message: "Check your email." };
+    return { message: "Password reset. Check your email." };
   },
 
   async resetPassword(parent, args, ctx, info) {
