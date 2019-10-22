@@ -9,10 +9,21 @@ const ONE_YEAR = 1000 * 60 * 60 * 24 * 365; // 1 year in milliseconds
 
 const Mutations = {
   async createItem(parent, args, ctx, info) {
-    // TODO: Check if they are logged in
+    // Check if they are logged in
+    if (!ctx.request.userId) {
+      throw new Error('You must be logged in to create an item.');
+    }
 
     const item = await ctx.db.mutation.createItem({
-      data: { ...args }
+      data: { 
+        ...args, 
+        // Create a relationship between item and user
+        user: {
+          connect: {
+            id: ctx.request.userId,
+          }
+        }
+      }
     }, info);
 
     return item;
