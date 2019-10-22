@@ -54,7 +54,9 @@ class ResetPassword extends Component {
             <Form method="post" onSubmit={async e => {
               e.preventDefault();
               await reset();
+              
               // Reroute to home page if reset() is successful
+              this.setState({ ...this.emptyFormState });
               Router.push({
                 pathname: '/',
               });

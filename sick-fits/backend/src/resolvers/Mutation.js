@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 
+const { transport, makeANiceEmail } = require('../mail');
+
 const ONE_YEAR = 1000 * 60 * 60 * 24 * 365; // 1 year in milliseconds
 
 const Mutations = {
@@ -124,6 +126,22 @@ const Mutations = {
     });
 
     // 3. Email them that reset token
+    const mailRes = await transport.sendMail({
+      from: 'MarlaBHoggard@gmail.com',
+      to: email,
+      subject: 'Sick Fits - Reset Your Password',
+      html: makeANiceEmail(`
+        Reset your password here:<br/>
+        \n
+        <a href="${process.env.FRONTEND_URL}/reset?resetToken=${resetToken}">Click Here to Reset</a><br/><br/>
+        \n
+        Link trouble? Copy and paste the URL into your browser:<br/>
+        \n
+        ${process.env.FRONTEND_URL}/reset?resetToken=${resetToken}
+      `),
+    });
+
+    // 4. Return a success message
     return { message: "Password reset. Check your email." };
   },
 
