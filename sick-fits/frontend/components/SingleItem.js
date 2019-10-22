@@ -55,7 +55,7 @@ class SingleItem extends Component {
           const item = data.item;
           return (
             <SingleItemStyles>
-              <Head><title>Sick Fites | {item.title}</title></Head>
+              <Head><title>Sick Fits | {item.title}</title></Head>
               <img src={item.largeImage} alt={item.title} />
               <div className="details">
                 <h2>Viewing {item.title}</h2>
