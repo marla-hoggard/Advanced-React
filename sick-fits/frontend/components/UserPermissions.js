@@ -35,6 +35,7 @@ class UserPermissions extends Component {
 
   state = {
     permissions: this.props.user.permissions,
+    updated: false,
   };
 
   handleChange = e => {
@@ -45,7 +46,12 @@ class UserPermissions extends Component {
     } else {
       permissions = this.state.permissions.filter(p => p !== perm); // Remove permission
     }
-    this.setState({ permissions });
+    this.setState({ permissions, updated: true });
+  }
+
+  handleUpdate = (e, update) => {
+    update();
+    this.setState({ updated: false });
   }
 
   render() {
@@ -81,11 +87,11 @@ class UserPermissions extends Component {
               ))}
               <td>
                 <SickButton
-                  onClick={updatePermissions}
+                  onClick={e => this.handleUpdate(e, updatePermissions)}
                   type="button"
-                  disabled={loading}
+                  disabled={loading || !this.state.updated}
                 >
-                  {loading ? 'UPDATING' : 'UPDATE'}
+                  {loading ? 'SAVING...' : 'SAVE'}
                 </SickButton>
               </td>
             </tr>

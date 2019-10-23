@@ -23,33 +23,34 @@ const Permissions = props => {
       query={ALL_USERS_QUERY}
     >
       {({ data, error, loading }) => {
-        if (loading) return <p>Loading...</p>
+        if (loading) return <p>Loading...</p>;
+        if (error) return <Error error={error} />;
 
         return (
           <>
-            <Error error={error} />
-            <div>
-              <h2>Manage Permissions</h2>
-              <Table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    {possiblePermissions.map(perm => <th key={perm}>{perm}</th>)}
-                    <th>Update</th>
-                  </tr>
-                </thead>
+            <h2>Manage Permissions</h2>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  {possiblePermissions.map(perm => <th key={perm}>{perm}</th>)}
+                  <th>Save Changes</th>
+                </tr>
+              </thead>
+              {data.users ?
                 <tbody>
                   {data.users.map(user => (
                     <UserPermissions key={user.id} user={user} />
                   ))}
                 </tbody>
-              </Table>
-            </div>
+                :
+                <tbody><tr><td colSpan="8">No users found</td></tr></tbody>
+              }
+            </Table>
           </>
         )
       }}
-
     </Query>
   );
 };
