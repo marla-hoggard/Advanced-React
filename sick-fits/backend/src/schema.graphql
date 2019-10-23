@@ -53,6 +53,8 @@ type Mutation {
     permissions: [Permission]
     userId: ID!
   ): User
+
+  addToCart(id: ID!): CartItem
 }
 
 type SuccessMessage {
@@ -65,4 +67,5 @@ type User {
   email: String!
   password: String!
   permissions: [Permission!]!
+  cart: [CartItem!]!
 }
