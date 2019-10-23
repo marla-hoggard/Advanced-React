@@ -45,9 +45,15 @@ const Mutations = {
     const where = { id: args.id };
 
     // 1. Find the item
-    const item = await ctx.db.query.item({ where }, `{ id title }`);
+    const item = await ctx.db.query.item({ where }, `{ id title user { id }}`);
+
     // 2. Check if they own that item or have permissions
-    // TODO
+    const isOwner = item.user.id === ctx.request.userId;
+    const hasPermission = ctx.request.user.permissions.some(perm => ['ADMIN', 'ITEMDELETE'].includes(perm));
+    if (!(isOwner || hasPermission)) {
+      throw new Error("You don't have permission to delete that item.")
+    }
+
     // 3. Delete it
     return ctx.db.mutation.deleteItem({ where }, info);
   },
