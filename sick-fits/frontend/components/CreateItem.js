@@ -38,13 +38,24 @@ class CreateItem extends Component {
   };
 
   handleChange = (e) => {
-    const { name, type, value} = e.target;
+    const { name, type, value } = e.target;
 
-    // Inputs always come in as string. If the type needs to be stored as a number, convert it 
+    // Inputs always come in as string. If the type needs to be stored as a number, convert it
     const val = type === 'number' && value.length ? parseFloat(value) : value;
 
     this.setState({ [name]: val });
   };
+
+  handleSubmit = async (e, createItem) => {
+    e.preventDefault();
+
+    const res = await createItem();
+
+    Router.push({
+      pathname: '/item',
+      query: { id: res.data.createItem.id },
+    });
+  }
 
   uploadFile = async e => {
     const files = e.target.files;
@@ -85,27 +96,18 @@ class CreateItem extends Component {
 
   render() {
     return (
-      <Mutation 
+      <Mutation
         mutation={CREATE_ITEM_MUTATION}
         variables={this.state}
         update={this.update}
       >
-        {(createItem, {loading, error}) => (
-          <Form onSubmit={async e => {
-            e.preventDefault();
-            // Call the mutation
-            const res = await createItem();
-            // Go to the single-item page for the new item
-            Router.push({
-              pathname: '/item',
-              query: { id: res.data.createItem.id },
-            });
-          }}>
+        {(createItem, { loading, error }) => (
+          <Form onSubmit={e => this.handleSubmit(e, createItem)}>
             <Error error={error} />
             <fieldset disabled={loading} aria-busy={loading}>
-            <label htmlFor="file">
+              <label htmlFor="file">
                 Image
-                <input 
+                <input
                   type="file"
                   id="file"
                   name="file"
@@ -116,38 +118,38 @@ class CreateItem extends Component {
               </label>
               <label htmlFor="title">
                 Title
-                <input 
+                <input
                   type="text"
                   id="title"
                   name="title"
                   placeholder="Title"
                   onChange={this.handleChange}
                   value={this.state.title}
-                  required  
+                  required
                 />
               </label>
               <label htmlFor="price">
                 Price
-                <input 
+                <input
                   type="number"
                   id="price"
                   name="price"
                   placeholder="Price (in cents)"
                   onChange={this.handleChange}
                   value={this.state.price}
-                  required  
+                  required
                 />
               </label>
               <label htmlFor="description">
                 Description
-                <textarea 
+                <textarea
                   type="text"
                   id="description"
                   name="description"
                   placeholder="Enter a Description"
                   onChange={this.handleChange}
                   value={this.state.description}
-                  required  
+                  required
                 />
               </label>
               <button type="submit">Submit</button>

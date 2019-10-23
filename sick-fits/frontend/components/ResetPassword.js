@@ -32,10 +32,21 @@ class ResetPassword extends Component {
     confirmPassword: '',
   };
 
-  state = {...this.emptyFormState};
+  state = { ...this.emptyFormState };
 
   saveToState = e => {
     this.setState({ [e.target.name]: e.target.value });
+  }
+
+  handleSubmit = async (e, reset) => {
+    e.preventDefault();
+    await reset();
+
+    // Reroute to home page if reset() is successful
+    this.setState({ ...this.emptyFormState });
+    Router.push({
+      pathname: '/',
+    });
   }
 
   render() {
@@ -48,41 +59,32 @@ class ResetPassword extends Component {
           confirmPassword: this.state.confirmPassword,
         }}
         refetchQueries={[{ query: CURRENT_USER_QUERY }]}
-      > 
-        {(reset, { error, loading, called} ) => {
+      >
+        {(reset, { error, loading }) => {
           return (
-            <Form method="post" onSubmit={async e => {
-              e.preventDefault();
-              await reset();
-              
-              // Reroute to home page if reset() is successful
-              this.setState({ ...this.emptyFormState });
-              Router.push({
-                pathname: '/',
-              });
-            }}>
+            <Form method="post" onSubmit={e => this.handleSubmit(e, reset)}>
               <fieldset disabled={loading} aria-busy={loading}>
                 <h2>Reset Your Password</h2>
                 <Error error={error} />
                 <label htmlFor="newPassword">
                   Password
-                  <input 
-                    type="password" 
-                    name="newPassword" 
-                    placeholder="Password" 
+                  <input
+                    type="password"
+                    name="newPassword"
+                    placeholder="Password"
                     required
-                    value={this.state.newPassword} 
+                    value={this.state.newPassword}
                     onChange={this.saveToState}
                   />
                 </label>
                 <label htmlFor="confirmPassword">
                   Confirm Password
-                  <input 
-                    type="password" 
-                    name="confirmPassword" 
-                    placeholder="Confirm Password" 
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
                     required
-                    value={this.state.confirmPassword} 
+                    value={this.state.confirmPassword}
                     onChange={this.saveToState}
                   />
                 </label>

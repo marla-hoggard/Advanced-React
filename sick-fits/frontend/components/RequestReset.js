@@ -20,32 +20,34 @@ class RequestReset extends Component {
     this.setState({ [e.target.name]: e.target.value });
   }
 
+  handleSubmit = async (e, reset) => {
+    e.preventDefault();
+    await reset();
+    // Note: If reset() throws an error, the submit function stops and state won't be cleared
+    this.setState({ email: '' });
+  }
+
   render() {
     return (
       <Mutation
         mutation={REQUEST_RESET_MUTATION}
         variables={this.state}
-      > 
-        {(reset, { error, loading, called} ) => {
+      >
+        {(reset, { error, loading, called }) => {
           return (
-            <Form method="post" onSubmit={async e => {
-              e.preventDefault();
-              await reset();
-              // Note: If requestReset() throws an error, the submit function stops and state won't be cleared
-              this.setState({ email: '' });
-            }}>
+            <Form method="post" onSubmit={e => this.handleSubmit(e, reset)}>
               <fieldset disabled={loading} aria-busy={loading}>
                 <h2>Reset Your Password</h2>
                 <Error error={error} />
                 {!error && !loading && called && <p>Success! Check your email for a reset link.</p>}
                 <label htmlFor="email">
                   Email
-                  <input 
+                  <input
                     type="email"
-                    name="email" 
-                    placeholder="Email" 
+                    name="email"
+                    placeholder="Email"
                     required
-                    value={this.state.email} 
+                    value={this.state.email}
                     onChange={this.saveToState}
                   />
                 </label>

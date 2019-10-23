@@ -91,7 +91,7 @@ class UserPermissions extends Component {
                   type="button"
                   disabled={loading || !this.state.updated}
                 >
-                  {loading ? 'SAVING...' : 'SAVE'}
+                  {loading ? 'SAVING' : 'SAVE'}
                 </SickButton>
               </td>
             </tr>

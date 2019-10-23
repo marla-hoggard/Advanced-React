@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
+import Router from 'next/router';
 
 import Form from './styles/Form';
 import Error from './ErrorMessage';
@@ -22,10 +23,21 @@ class Signup extends Component {
     name: '',
     password: '',
   }
-  state = {...this.emptyFormState};
+  state = { ...this.emptyFormState };
 
   saveToState = e => {
     this.setState({ [e.target.name]: e.target.value });
+  }
+
+  handleSubmit = async (e, signup) => {
+    e.preventDefault();
+    await signup();
+
+    // Note: If signup() throws an error, the submit function stops and state won't be cleared
+    this.setState({ ...this.emptyFormState });
+    Router.push({
+      pathname: '/',
+    });
   }
 
   render() {
@@ -34,49 +46,44 @@ class Signup extends Component {
         mutation={SIGNUP_MUTATION}
         variables={this.state}
         refetchQueries={[{ query: CURRENT_USER_QUERY }]}
-      > 
-        {(signup, { error, loading} ) => {
+      >
+        {(signup, { error, loading }) => {
 
           return (
-            <Form method="post" onSubmit={async e => {
-              e.preventDefault();
-              await signup();
-              // Note: If signup() throws an error, the submit function stops and state won't be cleared
-              this.setState({...this.emptyFormState});
-            }}>
+            <Form method="post" onSubmit={e => this.handleSubmit(e, signup)}>
               <fieldset disabled={loading} aria-busy={loading}>
                 <h2>Sign Up for an Account</h2>
                 <Error error={error} />
                 <label htmlFor="email">
                   Email
-                  <input 
+                  <input
                     type="email"
-                    name="email" 
-                    placeholder="Email" 
+                    name="email"
+                    placeholder="Email"
                     required
-                    value={this.state.email} 
+                    value={this.state.email}
                     onChange={this.saveToState}
                   />
                 </label>
                 <label htmlFor="name">
                   Name
-                  <input 
-                    type="text" 
-                    name="name" 
-                    placeholder="Name" 
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
                     required
-                    value={this.state.name} 
+                    value={this.state.name}
                     onChange={this.saveToState}
                   />
                 </label>
                 <label htmlFor="password">
                   Password
-                  <input 
-                    type="password" 
-                    name="password" 
-                    placeholder="Password" 
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
                     required
-                    value={this.state.password} 
+                    value={this.state.password}
                     onChange={this.saveToState}
                   />
                 </label>
