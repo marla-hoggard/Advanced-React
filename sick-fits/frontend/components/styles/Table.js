@@ -11,7 +11,7 @@ const Table = styled.table`
   th {
     border-bottom: 1px solid ${props => props.theme.offWhite};
     border-right: 1px solid ${props => props.theme.offWhite};
-    padding: 10px 5px;
+    padding: 5px;
     position: relative;
     &:last-child {
       border-right: none;
@@ -19,6 +19,15 @@ const Table = styled.table`
       button {
         width: 100%;
       }
+    }
+    button {
+      cursor: pointer;
+    }
+    label {
+      display: block;
+      padding: 10px 5px;
+      cursor: pointer;
+      text-align: center;
     }
   }
   tr {
