@@ -19,8 +19,28 @@ const CartItemStyles = styled.li`
   }
 `;
 
+const DeletedItemStyles = styled.li`
+  padding: 1rem 0;
+  border-bottom: 1px solid ${props => props.theme.lightgrey};
+  display: grid;
+  align-items: center;
+  grid-template-columns: 1fr auto;
+  p {
+    margin: 0;
+  }
+`;
+
 const CartItem = props => {
   const { item, quantity, id } = props.cartItem;
+
+  if (!props.cartItem.item) {
+    return (
+      <DeletedItemStyles>
+        <p>This item has been deleted.</p>
+        <RemoveFromCart id={id} />
+      </DeletedItemStyles>
+    );
+  }
 
   return (
     <CartItemStyles>
