@@ -262,8 +262,38 @@ const Mutations = {
         user: { connect: { id: userId } },
         item: { connect: { id: args.id } },
       },
+      info,
     });
   },
+
+  async removeFromCart(parent, args, ctx, info) {
+    // 1. Make sure they are signed in
+    errorIfNotLoggedIn(ctx, 'You must be signed in to access the cart.');
+    const { userId } = ctx.request;
+    const itemId = args.id;
+
+    // 2. Find the cart item
+    const itemToDelete = await ctx.db.query.cartItem(
+      {
+        where: { id: itemId },
+      },
+      `{ id, user { id }}`,
+    );
+
+    if (!itemToDelete) {
+      throw new Error(`Item with id ${itemId} not found.`);
+    }
+
+    // 3. Make sure they own that cart item
+    if (itemToDelete.user.id !== userId) {
+      throw new Error("You can't delete an item from someone else's cart.");
+    }
+
+    // 4. Delete that cart item
+    return ctx.db.mutation.deleteCartItem({
+      where: { id: itemId },
+    }, info);
+  }
 };
 
 module.exports = Mutations;

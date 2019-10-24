@@ -55,6 +55,7 @@ type Mutation {
   ): User
 
   addToCart(id: ID!): CartItem
+  removeFromCart(id: ID!): CartItem
 }
 
 type SuccessMessage {
