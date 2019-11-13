@@ -31,6 +31,26 @@ const Query = {
 
     // 3. Query all the users
     return ctx.db.query.users({}, info);
+  },
+  async order(parent, args, ctx, info) {
+    // 1. Make sure they are logged in
+    errorIfNotLoggedIn(ctx);
+
+    // 2. Query the current order
+    const order = await ctx.db.query.order({
+      where: { id: args.id },
+    }, info);
+
+    // 3. Make sure they have permissions to see the order
+    const ownsOrder = order.user.id === ctx.request.userId;
+    const hasPermissionOrder = ctx.request.user.permissions.includes('ADMIN');
+
+    if (!ownsOrder || !hasPermissionOrder) {
+      throw new Error("You don't have permission to see this order.");
+    }
+
+    // 4. Return the order
+    return order;
   }
 };
 
