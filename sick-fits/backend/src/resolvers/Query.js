@@ -32,6 +32,7 @@ const Query = {
     // 3. Query all the users
     return ctx.db.query.users({}, info);
   },
+
   async order(parent, args, ctx, info) {
     // 1. Make sure they are logged in
     errorIfNotLoggedIn(ctx);
@@ -51,6 +52,19 @@ const Query = {
 
     // 4. Return the order
     return order;
+  },
+
+  async orders(parent, args, ctx, info) {
+    // 1. Make sure they are logged in
+    errorIfNotLoggedIn(ctx);
+    const { userId } = ctx.request;
+
+    // 2. Query the user's orders
+    const orders = await ctx.db.query.orders({
+      where: { user: { id: userId } },
+    }, info);
+
+    return orders;
   }
 };
 
