@@ -37,16 +37,16 @@
     "react-dom": "^16.11.0",
     "react-stripe-checkout": "^2.6.3",
     "react-transition-group": "^2.5.0",
-    "styled-components": "^3.4.9",
+    "styled-components": "^4.4.1",
     "waait": "^1.0.2"
   },
   "devDependencies": {
-    "babel-jest": "^25.0.0",
+    "babel-jest": "^23.6.0",
     "babel-plugin-module-resolver": "^3.1.1",
     "casual": "^1.5.19",
     "enzyme-to-json": "^3.3.4",
     "graphql-tools": "^4.0.0",
-    "jest": "^25.0.0",
+    "jest": "^23.6.0",
     "jest-transform-graphql": "^2.1.0"
   },
   "jest": {
