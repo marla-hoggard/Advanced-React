@@ -1,15 +1,14 @@
 import React from 'react';
-import { Query, Mutation } from 'react-apollo';
+import { useQuery, useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
-import { adopt } from 'react-adopt';
 
 import User from './User';
+import CartItem from './CartItem';
+import TakeMyMoney from './TakeMyMoney';
 import CartStyles from './styles/CartStyles';
 import Supreme from './styles/Supreme';
 import CloseButton from './styles/CloseButton';
 import SickButton from './styles/SickButton';
-import CartItem from './CartItem';
-import TakeMyMoney from './TakeMyMoney';
 import calcTotalPrice from '../lib/calcTotalPrice';
 import formatMoney from '../lib/formatMoney';
 
@@ -25,23 +24,18 @@ export const TOGGLE_CART_MUTATION = gql`
   }
 `;
 
-// This saves us from render prop hell!
-// Without this, we had <User>...<Mutation>...<Query>...</Query></Mutation></User>
-const ComposedCart = adopt({
-  user: ({ render }) => <User>{render}</User>,
-  toggleCart: ({ render }) => <Mutation mutation={TOGGLE_CART_MUTATION}>{render}</Mutation>,
-  localState: ({ render }) => <Query query={LOCAL_STATE_QUERY}>{render}</Query>,
-})
-
 const Cart = () => {
+  const { data: localState } = useQuery(LOCAL_STATE_QUERY);
+  const [toggleCart] = useMutation(TOGGLE_CART_MUTATION);
+
   return (
-    <ComposedCart>
-      {({ user, toggleCart, localState }) => {
-        const me = user && user.data ? user.data.me : undefined;
+    <User>
+      {({ data: userData }) => {
+        const me = userData && userData.me;
         if (!me) return null;
 
         return (
-          <CartStyles open={localState.data.cartOpen}>
+          <CartStyles open={localState.cartOpen}>
             <header>
               <CloseButton title="close" onClick={toggleCart}>&times;</CloseButton>
               <Supreme>{me.name}'s Cart</Supreme>
@@ -60,11 +54,9 @@ const Cart = () => {
               )}
             </footer>
           </CartStyles>
-
         );
       }}
-    </ComposedCart>
-
+    </User>
   );
 };
 

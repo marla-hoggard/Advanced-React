@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Mutation } from 'react-apollo';
+import { useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 
 import SickButton from './styles/SickButton';
@@ -23,83 +23,75 @@ const UPDATE_PERMISSIONS_MUTATION = gql`
   }
 `;
 
-class UserPermissions extends Component {
-  static propTypes = {
-    user: PropTypes.shape({
-      name: PropTypes.string,
-      email: PropTypes.string,
-      id: PropTypes.string,
-      permissions: PropTypes.array,
-    }).isRequired,
-  };
+const UserPermissions = ({ user }) => {
+  const [permissions, setPermissions] = useState(user.permissions);
+  const [updated, setUpdated] = useState(false);
 
-  state = {
-    permissions: this.props.user.permissions,
-    updated: false,
-  };
-
-  handleChange = e => {
+  const handleChange = e => {
     const perm = e.target.value;
-    let permissions;
+    let perms;
     if (e.target.checked) {
-      permissions = this.state.permissions.concat(perm); // Add permission
+      perms = permissions.concat(perm); // Add permission
     } else {
-      permissions = this.state.permissions.filter(p => p !== perm); // Remove permission
+      perms = permissions.filter(p => p !== perm); // Remove permission
     }
-    this.setState({ permissions, updated: true });
+    setPermissions(perms);
+    setUpdated(true);
   }
 
-  handleUpdate = (e, update) => {
-    update();
-    this.setState({ updated: false });
+  const handleUpdate = (e) => {
+    updatePermissions();
+    setUpdated(false);
   }
 
-  render() {
-    const { user } = this.props;
+  const [updatePermissions, { loading, error }] = useMutation(UPDATE_PERMISSIONS_MUTATION, {
+    variables: {
+      permissions,
+      userId: user.id,
+    }
+  });
 
-    return (
-      <Mutation
-        mutation={UPDATE_PERMISSIONS_MUTATION}
-        variables={{
-          permissions: this.state.permissions,
-          userId: user.id,
-        }}
-      >
-        {(updatePermissions, { loading, error }) => (
-          <>
-            {error && <tr><td colSpan="8"><Error error={error} /></td></tr>}
+  return (
+    <>
+      {error && <tr><td colSpan="8"><Error error={error} /></td></tr>}
 
-            <tr key={user.id}>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              {possiblePermissions.map(perm => (
-                <td key={perm}>
-                  <label htmlFor={`${user.id}-permission-${perm}`}>
-                    <input
-                      type="checkbox"
-                      id={`${user.id}-permission-${perm}`}
-                      onChange={this.handleChange}
-                      value={perm}
-                      checked={this.state.permissions.includes(perm)}
-                    />
-                  </label>
-                </td>
-              ))}
-              <td>
-                <SickButton
-                  onClick={e => this.handleUpdate(e, updatePermissions)}
-                  type="button"
-                  disabled={loading || !this.state.updated}
-                >
-                  {loading ? 'SAVING' : 'SAVE'}
-                </SickButton>
-              </td>
-            </tr>
-          </>
-        )}
-      </Mutation>
-    );
-  }
-}
+      <tr key={user.id}>
+        <td>{user.name}</td>
+        <td>{user.email}</td>
+        {possiblePermissions.map(perm => (
+          <td key={perm}>
+            <label htmlFor={`${user.id}-permission-${perm}`}>
+              <input
+                type="checkbox"
+                id={`${user.id}-permission-${perm}`}
+                onChange={handleChange}
+                value={perm}
+                checked={permissions.includes(perm)}
+              />
+            </label>
+          </td>
+        ))}
+        <td>
+          <SickButton
+            onClick={handleUpdate}
+            type="button"
+            disabled={loading || !updated}
+          >
+            {loading ? 'SAVING' : 'SAVE'}
+          </SickButton>
+        </td>
+      </tr>
+    </>
+  );
+};
+
+UserPermissions.propTypes = {
+  user: PropTypes.shape({
+    name: PropTypes.string,
+    email: PropTypes.string,
+    id: PropTypes.string,
+    permissions: PropTypes.array,
+  }).isRequired,
+};
 
 export default UserPermissions;

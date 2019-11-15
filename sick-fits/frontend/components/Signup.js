@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Mutation } from 'react-apollo';
+import React, { useState } from 'react';
+import { useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import Router from 'next/router';
 
@@ -17,84 +17,79 @@ const SIGNUP_MUTATION = gql`
   }
 `;
 
-class Signup extends Component {
-  emptyFormState = {
+const Signup = () => {
+  const emptyFormState = {
     email: '',
     name: '',
     password: '',
   }
-  state = { ...this.emptyFormState };
+  const [state, setState] = useState({ ...emptyFormState });
 
-  saveToState = e => {
-    this.setState({ [e.target.name]: e.target.value });
+  const saveToState = e => {
+    setState({
+      ...state,
+      [e.target.name]: e.target.value
+    });
   }
 
-  handleSubmit = async (e, signup) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     await signup();
 
     // Note: If signup() throws an error, the submit function stops and state won't be cleared
-    this.setState({ ...this.emptyFormState });
+    setState({ ...emptyFormState });
     Router.push({
       pathname: '/',
     });
   }
 
-  render() {
-    return (
-      <Mutation
-        mutation={SIGNUP_MUTATION}
-        variables={this.state}
-        refetchQueries={[{ query: CURRENT_USER_QUERY }]}
-      >
-        {(signup, { error, loading }) => {
+  const [signup, { error, loading }] = useMutation(SIGNUP_MUTATION, {
+    variables: { ...state },
+    refetchQueries: [{ query: CURRENT_USER_QUERY }],
+  })
 
-          return (
-            <Form method="post" onSubmit={e => this.handleSubmit(e, signup)}>
-              <fieldset disabled={loading} aria-busy={loading}>
-                <h2>Sign Up for an Account</h2>
-                <Error error={error} />
-                <label htmlFor="email">
-                  Email
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    required
-                    value={this.state.email}
-                    onChange={this.saveToState}
-                  />
-                </label>
-                <label htmlFor="name">
-                  Name
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    required
-                    value={this.state.name}
-                    onChange={this.saveToState}
-                  />
-                </label>
-                <label htmlFor="password">
-                  Password
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    required
-                    value={this.state.password}
-                    onChange={this.saveToState}
-                  />
-                </label>
-                <button type="submit">Sign Up!</button>
-              </fieldset>
-            </Form>
-          );
-        }}
-      </Mutation>
-    );
-  }
+  return (
+    <Form method="post" onSubmit={handleSubmit}>
+      <fieldset disabled={loading} aria-busy={loading}>
+        <h2>Sign Up for an Account</h2>
+        <Error error={error} />
+        <label htmlFor="email">
+          Email
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            required
+            value={state.email}
+            onChange={saveToState}
+          />
+        </label>
+        <label htmlFor="name">
+          Name
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            required
+            value={state.name}
+            onChange={saveToState}
+          />
+        </label>
+        <label htmlFor="password">
+          Password
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            value={state.password}
+            onChange={saveToState}
+          />
+        </label>
+        <button type="submit">Sign Up!</button>
+      </fieldset>
+    </Form>
+  );
 }
 
 export default Signup;
