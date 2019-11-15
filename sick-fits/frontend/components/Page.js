@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
 import Header from './Header';
 import Meta from './Meta';
@@ -38,6 +38,9 @@ const GlobalStyle = createGlobalStyle`
     text-decoration: none;
     color: ${theme.black};
   }
+  button {
+    cursor: pointer;
+  }
 `;
 
 const StyledPage = styled.div`
@@ -51,19 +54,17 @@ const Inner = styled.div`
   padding: 2rem;
 `;
 
-class Page extends Component {
-  render() {
-    return (
-      <ThemeProvider theme={theme}>
-        <StyledPage>
-          <Meta />
-          <Header />
-          <Inner>{this.props.children}</Inner>
-        </StyledPage>
-        <GlobalStyle />
-      </ThemeProvider>
-    );
-  }
-}
+const Page = (props) => {
+  return (
+    <ThemeProvider theme={theme}>
+      <StyledPage>
+        <Meta />
+        <Header />
+        <Inner>{props.children}</Inner>
+      </StyledPage>
+      <GlobalStyle />
+    </ThemeProvider>
+  );
+};
 
 export default Page;

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Mutation } from 'react-apollo';
+import React, { useState } from 'react';
+import { useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import Router from 'next/router';
 
@@ -28,25 +28,25 @@ const CREATE_ITEM_MUTATION = gql`
   }
 `;
 
-class CreateItem extends Component {
-  state = {
+const CreateItem = () => {
+  const [state, setState] = useState({
     title: '',
     description: '',
     image: '',
     largeImage: '',
     price: 0,
-  };
+  });
 
-  handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, type, value } = e.target;
 
     // Inputs always come in as string. If the type needs to be stored as a number, convert it
     const val = type === 'number' && value.length ? parseFloat(value) : value;
 
-    this.setState({ [name]: val });
+    setState({ ...state, [name]: val });
   };
 
-  handleSubmit = async (e, createItem) => {
+  const handleSubmit = async (e, createItem) => {
     e.preventDefault();
 
     const res = await createItem();
@@ -57,7 +57,7 @@ class CreateItem extends Component {
     });
   }
 
-  uploadFile = async e => {
+  const uploadFile = async e => {
     const files = e.target.files;
     if (files.length) {
       const data = new FormData();
@@ -68,14 +68,15 @@ class CreateItem extends Component {
         body: data,
       });
       const file = await res.json();
-      this.setState({
+      setState({
+        ...state,
         image: file.secure_url,
         largeImage: file.eager ? file.eager[0].secure_url : '',
       });
     }
   };
 
-  update = (cache, payload) => {
+  const update = (cache, payload) => {
     // 1. Read the cache for the items we want
     const data = cache.readQuery({ query: ALL_ITEMS_QUERY });
     const pagination = cache.readQuery({ query: PAGINATION_QUERY });
@@ -84,7 +85,7 @@ class CreateItem extends Component {
     const newItem = {
       id: payload.data.createItem.id,
       __typename: "Item",
-      ...this.state,
+      ...state,
     }
     data.items = [newItem, ...data.items];
     pagination.itemsConnection.aggregate.count++;
@@ -94,71 +95,65 @@ class CreateItem extends Component {
     cache.writeQuery({ query: PAGINATION_QUERY, data: pagination });
   }
 
-  render() {
-    return (
-      <Mutation
-        mutation={CREATE_ITEM_MUTATION}
-        variables={this.state}
-        update={this.update}
-      >
-        {(createItem, { loading, error }) => (
-          <Form onSubmit={e => this.handleSubmit(e, createItem)}>
-            <Error error={error} />
-            <fieldset disabled={loading} aria-busy={loading}>
-              <label htmlFor="file">
-                Image
-                <input
-                  type="file"
-                  id="file"
-                  name="file"
-                  placeholder="Upload an Image"
-                  onChange={this.uploadFile}
-                />
-                {this.state.image && <img src={this.state.image} alt="Upload Preview" />}
-              </label>
-              <label htmlFor="title">
-                Title
-                <input
-                  type="text"
-                  id="title"
-                  name="title"
-                  placeholder="Title"
-                  onChange={this.handleChange}
-                  value={this.state.title}
-                  required
-                />
-              </label>
-              <label htmlFor="price">
-                Price
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  placeholder="Price (in cents)"
-                  onChange={this.handleChange}
-                  value={this.state.price}
-                  required
-                />
-              </label>
-              <label htmlFor="description">
-                Description
-                <textarea
-                  type="text"
-                  id="description"
-                  name="description"
-                  placeholder="Enter a Description"
-                  onChange={this.handleChange}
-                  value={this.state.description}
-                  required
-                />
-              </label>
-              <button type="submit">Submit</button>
-            </fieldset>
-          </Form>
-        )}
-      </Mutation>
-    );
-  }
+  const [createItem, { loading, error }] = useMutation(CREATE_ITEM_MUTATION, {
+    variables: { ...state },
+    update,
+  });
+  return (
+    <Form onSubmit={e => handleSubmit(e, createItem)}>
+      <Error error={error} />
+      <fieldset disabled={loading} aria-busy={loading}>
+        <label htmlFor="file">
+          Image
+              <input
+            type="file"
+            id="file"
+            name="file"
+            placeholder="Upload an Image"
+            onChange={uploadFile}
+          />
+          {state.image && <img src={state.image} alt="Upload Preview" />}
+        </label>
+        <label htmlFor="title">
+          Title
+              <input
+            type="text"
+            id="title"
+            name="title"
+            placeholder="Title"
+            onChange={handleChange}
+            value={state.title}
+            required
+          />
+        </label>
+        <label htmlFor="price">
+          Price
+              <input
+            type="number"
+            id="price"
+            name="price"
+            placeholder="Price (in cents)"
+            onChange={handleChange}
+            value={state.price}
+            required
+          />
+        </label>
+        <label htmlFor="description">
+          Description
+              <textarea
+            type="text"
+            id="description"
+            name="description"
+            placeholder="Enter a Description"
+            onChange={handleChange}
+            value={state.description}
+            required
+          />
+        </label>
+        <button type="submit">Submit</button>
+      </fieldset>
+    </Form>
+  );
 }
 
 export default CreateItem;
