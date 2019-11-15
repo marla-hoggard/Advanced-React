@@ -47,20 +47,20 @@ class TakeMyMoney extends Component {
   render() {
     return (
       <User>
-        {({ data: { me } }) => (
+        {({ data }) => (
           <Mutation
             mutation={CREATE_ORDER_MUTATION}
             refetchQueries={[{ query: CURRENT_USER_QUERY }]}
           >
             {createOrder => (
               <StripeCheckout
-                amount={calcTotalPrice(me.cart)}
+                amount={calcTotalPrice(data && data.me.cart)}
                 name="Sick Fits"
-                description={`Order of ${totalItems(me.cart)} items`}
-                image={me.cart.length && me.cart[0].item && me.cart[0].item.image}
+                description={`Order of ${totalItems(data.me.cart)} items`}
+                image={data && data.me.cart.length && data.me.cart[0].item && data.me.cart[0].item.image}
                 stripeKey={STRIPE_PUBLIC_KEY}
                 currency="USD"
-                email={me.email}
+                email={data && data.me.email}
                 token={res => this.onToken(res, createOrder)}
               >
                 {this.props.children}

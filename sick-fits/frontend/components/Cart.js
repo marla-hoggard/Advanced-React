@@ -37,7 +37,7 @@ const Cart = () => {
   return (
     <ComposedCart>
       {({ user, toggleCart, localState }) => {
-        const { me } = user.data;
+        const me = user && user.data ? user.data.me : undefined;
         if (!me) return null;
 
         return (

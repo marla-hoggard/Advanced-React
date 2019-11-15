@@ -10,12 +10,12 @@ import countItems from '../lib/countItems';
 
 const Nav = () => (
   <User>
-    {({ data: { me } }) => (
+    {({ data }) => (
       <NavStyles>
         <Link href="/items">
           <a>Shop</a>
         </Link>
-        {me && (
+        {data && data.me && (
           <>
             <Link href="/sell">
               <a>Sell</a>
@@ -32,14 +32,14 @@ const Nav = () => (
                   onClick={toggleCart}
                 >
                   My Cart
-                  <CartCount count={countItems(me.cart)} />
+                  <CartCount count={countItems(data.me.cart)} />
                 </button>
               )}
             </Mutation>
             <Signout />
           </>
         )}
-        {!me && (
+        {(!data || !data.me) && (
           <Link href="/signup">
             <a>Sign In</a>
           </Link>
