@@ -1,7 +1,5 @@
-
-
 import React from 'react';
-import { Mutation } from 'react-apollo';
+import { useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 
 import { CURRENT_USER_QUERY } from './User';
@@ -14,17 +12,12 @@ const SIGNOUT_MUTATION = gql`
   }
 `;
 
-const Signout = props => {
-  return (
-    <Mutation
-      mutation={SIGNOUT_MUTATION}
-      refetchQueries={[{ query: CURRENT_USER_QUERY }]}
-    >
-      {signout => (
-        <button onClick={signout}>Sign Out</button>
-      )}
-    </Mutation>
-  );
+const Signout = () => {
+  const [signout] = useMutation(SIGNOUT_MUTATION, {
+    refetchQueries: [{ query: CURRENT_USER_QUERY }],
+  });
+
+  return <button onClick={signout}>Sign Out</button>;
 };
 
 export default Signout;

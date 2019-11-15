@@ -1,4 +1,4 @@
-import { Query } from 'react-apollo';
+import { useQuery } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 
 import Error from './ErrorMessage';
@@ -17,41 +17,35 @@ const ALL_USERS_QUERY = gql`
   }
 `;
 
-const Permissions = props => {
-  return (
-    <Query
-      query={ALL_USERS_QUERY}
-    >
-      {({ data, error, loading }) => {
-        if (loading) return <p>Loading...</p>;
-        if (error) return <Error error={error} />;
+const Permissions = () => {
+  const { data, error, loading } = useQuery(ALL_USERS_QUERY);
 
-        return (
-          <>
-            <h2>Manage Permissions</h2>
-            <Table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  {possiblePermissions.map(perm => <th key={perm}>{perm}</th>)}
-                  <th>Save Changes</th>
-                </tr>
-              </thead>
-              {data.users ?
-                <tbody>
-                  {data.users.map(user => (
-                    <UserPermissions key={user.id} user={user} />
-                  ))}
-                </tbody>
-                :
-                <tbody><tr><td colSpan="8">No users found</td></tr></tbody>
-              }
-            </Table>
-          </>
-        )
-      }}
-    </Query>
+  if (loading) return <p>Loading...</p>;
+  if (error) return <Error error={error} />;
+
+  return (
+    <>
+      <h2>Manage Permissions</h2>
+      <Table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            {possiblePermissions.map(perm => <th key={perm}>{perm}</th>)}
+            <th>Save Changes</th>
+          </tr>
+        </thead>
+        {data.users ?
+          <tbody>
+            {data.users.map(user => (
+              <UserPermissions key={user.id} user={user} />
+            ))}
+          </tbody>
+          :
+          <tbody><tr><td colSpan="8">No users found</td></tr></tbody>
+        }
+      </Table>
+    </>
   );
 };
 

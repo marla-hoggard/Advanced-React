@@ -1,6 +1,6 @@
 import React from 'react';
+import { useQuery } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
-import { Query } from 'react-apollo';
 import Head from 'next/head';
 import Link from 'next/link';
 
@@ -17,44 +17,42 @@ export const PAGINATION_QUERY = gql`
   }
 `;
 
-const Pagination = props => (
-  <Query query={PAGINATION_QUERY}>
-    {({ data, error, loading }) => {
-      if (loading) return <p>Loading...</p>;
+const Pagination = props => {
+  const { data, loading } = useQuery(PAGINATION_QUERY);
 
-      const count = data.itemsConnection.aggregate.count;
-      const currentPage = props.currentPage;
-      const numPages = Math.ceil(count / perPage);
-      return (
-        <PaginationStyles>
-          <Head>
-            <title>Sick Fits! | Page {currentPage} of {numPages}</title>
-          </Head>
+  if (loading) return <p>Loading...</p>;
 
-          <Link
-            href={{
-              pathname: '/items',
-              query: { page: currentPage - 1 },
-            }}
-          >
-            <a className="prev" aria-disabled={currentPage <= 1}>← Prev</a>
-          </Link>
+  const count = data.itemsConnection.aggregate.count;
+  const currentPage = props.currentPage;
+  const numPages = Math.ceil(count / perPage);
+  return (
+    <PaginationStyles>
+      <Head>
+        <title>Sick Fits! | Page {currentPage} of {numPages}</title>
+      </Head>
 
-          <p>Page {currentPage} of {numPages}</p>
-          <p>{count} Total Items</p>
+      <Link
+        href={{
+          pathname: '/items',
+          query: { page: currentPage - 1 },
+        }}
+      >
+        <a className="prev" aria-disabled={currentPage <= 1}>← Prev</a>
+      </Link>
 
-          <Link
-            href={{
-              pathname: '/items',
-              query: { page: currentPage + 1 },
-            }}
-          >
-            <a className="next" aria-disabled={currentPage >= numPages}>Next →</a>
-          </Link>
-        </PaginationStyles>
-      )
-    }}
-  </Query>
-);
+      <p>Page {currentPage} of {numPages}</p>
+      <p>{count} Total Items</p>
+
+      <Link
+        href={{
+          pathname: '/items',
+          query: { page: currentPage + 1 },
+        }}
+      >
+        <a className="next" aria-disabled={currentPage >= numPages}>Next →</a>
+      </Link>
+    </PaginationStyles>
+  );
+};
 
 export default Pagination;

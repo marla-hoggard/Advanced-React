@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
-import { Mutation } from 'react-apollo';
+import React, { useState } from 'react';
+import { useMutation } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import PropTypes from 'prop-types';
 import Router from 'next/router';
 
-import Form from './styles/Form';
 import Error from './ErrorMessage';
 import { CURRENT_USER_QUERY } from './User';
+import Form from './styles/Form';
 
 const RESET_PASSWORD_MUTATION = gql`
   mutation RESET_PASSWORD_MUTATION($resetToken: String!, $newPassword: String!, $confirmPassword: String!) {
@@ -22,80 +22,76 @@ const RESET_PASSWORD_MUTATION = gql`
   }
 `;
 
-class ResetPassword extends Component {
-  static propTypes = {
-    resetToken: PropTypes.string.isRequired,
-  };
-
-  emptyFormState = {
+const ResetPassword = ({ resetToken }) => {
+  const emptyFormState = {
     newPassword: '',
     confirmPassword: '',
   };
 
-  state = { ...this.emptyFormState };
+  const [state, setState] = useState({ ...emptyFormState });
+  const [reset, { error, loading }] = useMutation(RESET_PASSWORD_MUTATION, {
+    variables: {
+      resetToken: resetToken,
+      newPassword: state.newPassword,
+      confirmPassword: state.confirmPassword,
+    },
+    refetchQueries: [{ query: CURRENT_USER_QUERY }],
+  });
 
-  saveToState = e => {
-    this.setState({ [e.target.name]: e.target.value });
-  }
+  const saveToState = e => {
+    setState({
+      ...state,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  handleSubmit = async (e, reset) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     await reset();
 
     // Reroute to home page if reset() is successful
-    this.setState({ ...this.emptyFormState });
+    setState({ ...emptyFormState });
     Router.push({
       pathname: '/',
     });
-  }
+  };
 
-  render() {
-    return (
-      <Mutation
-        mutation={RESET_PASSWORD_MUTATION}
-        variables={{
-          resetToken: this.props.resetToken,
-          newPassword: this.state.newPassword,
-          confirmPassword: this.state.confirmPassword,
-        }}
-        refetchQueries={[{ query: CURRENT_USER_QUERY }]}
-      >
-        {(reset, { error, loading }) => {
-          return (
-            <Form method="post" onSubmit={e => this.handleSubmit(e, reset)}>
-              <fieldset disabled={loading} aria-busy={loading}>
-                <h2>Reset Your Password</h2>
-                <Error error={error} />
-                <label htmlFor="newPassword">
-                  Password
-                  <input
-                    type="password"
-                    name="newPassword"
-                    placeholder="Password"
-                    required
-                    value={this.state.newPassword}
-                    onChange={this.saveToState}
-                  />
-                </label>
-                <label htmlFor="confirmPassword">
-                  Confirm Password
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    required
-                    value={this.state.confirmPassword}
-                    onChange={this.saveToState}
-                  />
-                </label>
-                <button type="submit">Set Password</button>
-              </fieldset>
-            </Form>
-          );
-        }}
-      </Mutation>
-    );
-  }
+  return (
+    <Form method="post" onSubmit={handleSubmit}>
+      <fieldset disabled={loading} aria-busy={loading}>
+        <h2>Reset Your Password</h2>
+        <Error error={error} />
+
+        <label htmlFor="newPassword">
+          Password
+          <input
+            type="password"
+            name="newPassword"
+            placeholder="Password"
+            required
+            value={state.newPassword}
+            onChange={saveToState}
+          />
+        </label>
+        <label htmlFor="confirmPassword">
+          Confirm Password
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            required
+            value={state.confirmPassword}
+            onChange={saveToState}
+          />
+        </label>
+        <button type="submit">Set Password</button>
+      </fieldset>
+    </Form>
+  );
 }
+
+ResetPassword.propTypes = {
+  resetToken: PropTypes.string.isRequired,
+};
 
 export default ResetPassword;
