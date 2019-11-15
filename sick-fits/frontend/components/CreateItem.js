@@ -99,6 +99,7 @@ const CreateItem = () => {
     variables: { ...state },
     update,
   });
+
   return (
     <Form onSubmit={e => handleSubmit(e, createItem)}>
       <Error error={error} />
@@ -156,5 +157,5 @@ const CreateItem = () => {
   );
 }
 
-export default CreateItem;
 export { CREATE_ITEM_MUTATION };
+export default CreateItem;

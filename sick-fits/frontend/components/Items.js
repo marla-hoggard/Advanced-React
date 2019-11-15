@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
-import { Query } from 'react-apollo';
+import React from 'react';
+import { useQuery } from '@apollo/react-hooks';
 import gql from 'graphql-tag';
 import styled from 'styled-components';
 
+import Error from './ErrorMessage';
 import Item from './Item';
 import Pagination from './Pagination';
 import { perPage } from '../config';
@@ -35,32 +36,26 @@ const ItemsList = styled.div`
   margin: 0 auto;
 `;
 
-class Items extends Component {
-  render() {
-    return (
-      <Center>
-        <Pagination currentPage={this.props.currentPage}>
+const Items = ({ currentPage }) => {
+  const { data, error, loading } = useQuery(ALL_ITEMS_QUERY, {
+    variables: { skip: currentPage * perPage - perPage },
+  });
 
-        </Pagination>
-        <Query 
-          query={ALL_ITEMS_QUERY}
-          variables={{ skip: this.props.currentPage * perPage - perPage }}
-        >
-          {({ data, error, loading }) => {
-            if (loading) return <p>Loading...</p>;
-            if (error) return <p>Error: {error.message}</p>;
-            return (
-              <ItemsList>
-                {data.items.map(item => <Item item={item} key={item.id} />)}
-              </ItemsList>
-            );
-          }}
-        </Query>
-        <Pagination currentPage={this.props.currentPage}></Pagination>
-      </Center>
-    );
-  }
-}
+  return (
+    <Center>
+      <Pagination currentPage={currentPage}></Pagination>
+      {loading ? <p>Loading...</p>
+        : error ? <Error error={error} />
+          : (
+            <ItemsList>
+              {data.items.map(item => <Item item={item} key={item.id} />)}
+            </ItemsList>
+          )
+      }
+      <Pagination currentPage={currentPage}></Pagination>
+    </Center>
+  );
+};
 
-export default Items;
 export { ALL_ITEMS_QUERY };
+export default Items;
